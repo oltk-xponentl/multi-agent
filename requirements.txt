@@ -2,6 +2,8 @@ langchain-google-genai
 langgraph
 langchain-chroma
 pypdf
+pymupdf
+pdfplumber
 streamlit
 python-dotenv
 chromadb
