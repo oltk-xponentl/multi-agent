@@ -30,7 +30,20 @@ def writer_node(state: AgentState):
     task = state["task"]
     research_notes = "\n\n".join(state["research_notes"])
     
-    formatted_prompt = WRITER_PROMPT.format(task=task, research_notes=research_notes)
+    # Check for previous critique (Self-Correction Logic)
+    critique = state.get("critique")
+    feedback_instruction = ""
+    
+    if critique and "REVISE" in critique:
+        print(f"  ! Incorporating feedback: {critique}")
+        feedback_instruction = f"\n\nIMPORTANT: The previous draft was rejected. \nFEEDBACK TO FIX: {critique}\nPlease fix these specific issues in the new draft."
+    
+    # Append feedback to prompt
+    formatted_prompt = WRITER_PROMPT.format(
+        task=task,
+        research_notes=research_notes
+    ) + feedback_instruction
+    
     response = llm.invoke([HumanMessage(content=formatted_prompt)])
     
     # Gemini's response can be a list of parts; we need to concatenate them if so
@@ -41,5 +54,5 @@ def writer_node(state: AgentState):
     return {
         "draft": draft,
         "revision_number": current_rev + 1,
-        "logs": [{"agent": "Writer", "message": "Drafted initial response."}]
+        "logs": [{"agent": "Writer", "message": f"Drafted response (Revision {current_rev + 1})"}]
     }
