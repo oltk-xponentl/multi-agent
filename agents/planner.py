@@ -18,8 +18,6 @@ llm = ChatGoogleGenerativeAI(
 def clean_gemini_response(response):
     """Helper to extract clean text from complex Gemini 3 responses."""
     content = response.content
-    
-    # Case 1: List of parts (e.g., [{'type': 'text', 'text': '...'}])
     if isinstance(content, list):
         full_text = []
         for part in content:
@@ -28,8 +26,6 @@ def clean_gemini_response(response):
             elif isinstance(part, str):
                 full_text.append(part)
         return "".join(full_text)
-        
-    # Case 2: Standard string
     return str(content)
 
 def planner_node(state: AgentState):
@@ -42,21 +38,20 @@ def planner_node(state: AgentState):
     formatted_prompt = PLANNER_PROMPT.format(task=task)
     response = llm.invoke([HumanMessage(content=formatted_prompt)])
     
-    # 1. Clean the response
     content = clean_gemini_response(response)
-    
-    # 2. Strip Markdown
     content = content.replace("```json", "").replace("```", "").strip()
     
     try:
         plan_data = json.loads(content)
         steps = plan_data.get("steps", [])
     except json.JSONDecodeError:
-        # Fallback
         steps = [task] 
-        print(f"Error parsing Planner JSON. Raw content: {content[:100]}...")
+        print(f"Error parsing Planner JSON.")
+
+    # Format steps for the log
+    steps_formatted = "\n".join([f"- {step}" for step in steps])
 
     return {
         "plan": steps,
-        "logs": [{"agent": "Planner", "message": f"Generated {len(steps)} step plan."}]
+        "logs": [{"agent": "Planner", "message": f"**Generated Execution Plan:**\n\n{steps_formatted}"}]
     }

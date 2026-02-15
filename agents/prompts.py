@@ -19,7 +19,7 @@ Output STRICT JSON format:
 """
 
 RESEARCHER_PROMPT = """You are a Senior Supply Chain Researcher.
-You have access to a vector database of 15 industry reports.
+You have access to a vector database of 13 industry reports.
 
 Your task:
 1. Analyze the following research plan step: "{step}"
@@ -41,7 +41,7 @@ RESEARCH NOTES:
 {research_notes}
 
 FORMAT REQUIREMENTS:
-1. Executive Summary (max 150 words).
+1. Executive Summary: Write a comprehensive, detailed summary (approx 200-250 words) outlining the key findings, strategic implications, and market context.
 2. Client-ready Email (Subject + Body).
 3. Action List (Owner, Due Date, Confidence Score).
 4. Sources and Citations section at the bottom.
