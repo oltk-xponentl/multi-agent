@@ -3,6 +3,7 @@ from langchain_core.messages import HumanMessage
 from agents.state import AgentState
 from agents.prompts import WRITER_PROMPT
 import os
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,6 +28,7 @@ def clean_gemini_response(response):
 
 def writer_node(state: AgentState):
     print("--- WRITER AGENT ---")
+    start_time = time.time()
     task = state["task"]
     research_notes = "\n\n".join(state["research_notes"])
     
@@ -45,13 +47,27 @@ def writer_node(state: AgentState):
     response = llm.invoke([HumanMessage(content=formatted_prompt)])
     draft = clean_gemini_response(response)
     
-    current_rev = state.get("revision_number", 0)
+    end_time = time.time()
+    latency = end_time - start_time
     
-    # Create a nice preview for the logs
+    # Token usage extraction with fallback for different response structures
+    usage = response.usage_metadata or response.response_metadata.get("usage_metadata", {})
+    input_tokens = usage.get("input_tokens", 0) or usage.get("prompt_token_count", 0)
+    output_tokens = usage.get("output_tokens", 0) or usage.get("candidates_token_count", 0)
+    
+    current_rev = state.get("revision_number", 0)
     preview = draft[:300].replace("\n", " ") + "..."
 
     return {
         "draft": draft,
         "revision_number": current_rev + 1,
-        "logs": [{"agent": "Writer", "message": f"**Draft Generated (Revision {current_rev + 1}):**\n\n_Preview: {preview}_"}]
+        "logs": [{"agent": "Writer", "message": f"**Draft Generated (Revision {current_rev + 1}):**\n\n_Preview: {preview}_"}],
+        "metrics": [{
+            "agent": "Writer",
+            "latency": latency,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "total_tokens": input_tokens + output_tokens,
+            "status": "Success"
+        }]
     }

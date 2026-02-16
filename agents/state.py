@@ -14,6 +14,8 @@ class AgentState(TypedDict):
         revision_number (int): Tracks loops to prevent infinite refinement.
         max_revisions (int): Hard limit on loops (default 2).
         logs (List[dict]): Traceability for the UI. Format: {"agent": str, "message": str}
+        metrics (List[dict]): Store observability data. Format: {"metric": str, "value": Any}
+        is_safe (bool): Flag for security status.
     """
     task: str
     plan: List[str]
@@ -23,3 +25,5 @@ class AgentState(TypedDict):
     revision_number: int
     max_revisions: int
     logs: Annotated[List[Dict[str, Any]], operator.add]
+    metrics: Annotated[List[Dict[str, Any]], operator.add]
+    is_safe: bool

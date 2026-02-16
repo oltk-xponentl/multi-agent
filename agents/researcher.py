@@ -4,6 +4,7 @@ from agents.state import AgentState
 from agents.prompts import RESEARCHER_PROMPT
 from retrieval.retriever import retrieve_documents
 import os
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,16 +34,28 @@ def researcher_node(state: AgentState):
     
     findings = []
     logs = []
+    
+    total_latency = 0
+    total_input = 0
+    total_output = 0
 
     for step in steps_to_execute:
         print(f"  > Researching: {step}")
+        step_start = time.time()
+        
         context = retrieve_documents(step, k=5)
-        
         formatted_prompt = RESEARCHER_PROMPT.format(step=step, context=context)
-        response = llm.invoke([HumanMessage(content=formatted_prompt)])
         
-        # Gemini's response can be a list of parts; we need to concatenate them if so
+        response = llm.invoke([HumanMessage(content=formatted_prompt)])
         result = clean_gemini_response(response)
+        
+        step_latency = time.time() - step_start
+        total_latency += step_latency
+        
+        # Robust token usage extraction to handle different response structures
+        usage = response.usage_metadata or response.response_metadata.get("usage_metadata", {})
+        total_input += usage.get("input_tokens", 0) or usage.get("prompt_token_count", 0)
+        total_output += usage.get("output_tokens", 0) or usage.get("candidates_token_count", 0)
         
         findings.append(f"### Research for: {step}\n{result}\n")
         logs.append({
@@ -52,5 +65,13 @@ def researcher_node(state: AgentState):
 
     return {
         "research_notes": findings,
-        "logs": logs
+        "logs": logs,
+        "metrics": [{
+            "agent": "Researcher",
+            "latency": total_latency,
+            "input_tokens": total_input,
+            "output_tokens": total_output,
+            "total_tokens": total_input + total_output,
+            "status": "Success"
+        }]
     }

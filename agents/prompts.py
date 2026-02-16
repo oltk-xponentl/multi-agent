@@ -41,15 +41,17 @@ RESEARCH NOTES:
 {research_notes}
 
 FORMAT REQUIREMENTS:
-1. Executive Summary: Write a comprehensive, detailed summary (approx 200-250 words) outlining the key findings, strategic implications, and market context.
-2. Client-ready Email (Subject + Body).
-3. Action List (Owner, Due Date, Confidence Score).
-4. Sources and Citations section at the bottom.
+1. Title: Start with a clear, H1 Markdown title (# Title).
+2. Executive Summary: Write a comprehensive summary (approx 200-250 words) outlining key findings. Use a separator (---) after the summary.
+3. Client-ready Email: Subject + Body.
+4. Action List: Create a table with columns: Action Item, Owner, Due Date, Confidence Score %.
+5. Sources: List citations at the bottom.
 
 CRITICAL RULES:
 - Use the citation format (Source: DocumentName, Page X) inline.
 - If a specific claim is missing evidence in the notes, write "Not found in sources".
-- Do not hallucinate data not present in the notes.
+- Confidence Scores MUST be percentages (e.g., 85%, 100%), NOT fractions (e.g. 8/10).
+- Do not use emojis.
 """
 
 VERIFIER_PROMPT = """You are a Compliance Auditor.
