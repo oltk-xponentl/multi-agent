@@ -1,10 +1,10 @@
-langchain-google-genai
-langgraph
-langchain-chroma
-pypdf
+python-dotenv
+pandas
 pymupdf
 pdfplumber
+langchain
+langchain-community
+langchain-core
+langchain-chroma
+langchain-google-genai
 streamlit
-python-dotenv
-chromadb
-pandas
